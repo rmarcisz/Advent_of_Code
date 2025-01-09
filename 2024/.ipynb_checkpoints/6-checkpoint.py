@@ -20,6 +20,8 @@ class AdventOfCodeD6:
         self.skips = 0
         self.result_path = 0
         self.paths = {}
+        self.number_of_loops = 0
+        self.activations = 0
 
     def find_robot(self):
         for r, row in enumerate(self.data_l):
@@ -42,6 +44,7 @@ class AdventOfCodeD6:
                 new_row = (self.data_l[self.robot_pos[0]][:self.robot_pos[1]]) + "X" + (self.data_l[self.robot_pos[0]][self.robot_pos[1]+1:])
                 self.data_l[self.robot_pos[0]] = new_row
                 self.robot_pos[0], self.robot_pos[1] = new_pos[0], new_pos[1]
+                
 
     def add_wall_on_path(self, i):
         self.robot_pos = self.starting_pos.copy()
@@ -61,6 +64,8 @@ class AdventOfCodeD6:
                         self.skips += 1
                     
     def move_robot_on_path(self):
+        self.activations += 1
+        self.movements = []
         self.move_robo = True
         while self.move_robo:
             new_pos = [a + b for a, b in zip(self.robot_pos, self.robot_dir.get(self.robot_pos[2]))]
@@ -74,26 +79,23 @@ class AdventOfCodeD6:
                 new_row = (self.data_path[self.robot_pos[0]][:self.robot_pos[1]]) + "X" + (self.data_path[self.robot_pos[0]][self.robot_pos[1]+1:])
                 self.data_path[self.robot_pos[0]] = new_row
                 self.robot_pos[0], self.robot_pos[1] = new_pos[0], new_pos[1]
+                if str(self.robot_pos) in self.movements:
+                    self.number_of_loops += 1
+                    return
+                self.movements.append(str(self.robot_pos) + '')
         
                     
     def count_x(self):
         for row in self.data_l:
             for char in row:
                 self.result += char == 'X'
-                
-    def count_x_path(self):
-        self.result_path = 0
-        for row in self.data_path:
-            for char in row:
-                self.result_path += char == 'X'
-        self.paths[self.skips] = self.result_path
 
     def get_x(self):
         return self.result
     
     def print_results(self):
         print(self.result)
-        print(self.paths)
+        print(self.number_of_loops)
         
     def print_maze(self):
         for row in self.data_l:
@@ -107,14 +109,13 @@ if __name__ == '__main__':
     advent = AdventOfCodeD6()
     advent.find_robot()
     advent.move_robot()
-    advent.print_maze()
+    #advent.print_maze()
     advent.count_x()
     amount = advent.get_x()
-    for a in range(10):
+    for a in range(amount):
         advent.add_wall_on_path(a)
         advent.move_robot_on_path()
-        advent.print_path()
-    advent.count_x_path()
+    #advent.print_path()
     advent.print_results()
 
     
