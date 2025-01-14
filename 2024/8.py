@@ -19,6 +19,7 @@ class AdventOfCodeD8:
         self.map_w = len(self.data_l[0])
         self.map_h = len(self.data_l)
         self.freq = []
+        self.letters = []
         for row in self.data_l:
             for char in row:
                 if char not in self.freq and char != '.':
@@ -29,6 +30,7 @@ class AdventOfCodeD8:
     def find_antenna(self):
         self.locations = []
         for char in self.freq:
+            self.letters.append(char)
             char_locs = []
             for h, row in enumerate(self.data_l):
                 for w, letter in enumerate(row):
@@ -46,14 +48,28 @@ class AdventOfCodeD8:
                     if antinode != loc and 0 <= antinode[0] < self.map_w and 0 <= antinode[1] < self.map_h and antinode not in self.antinodes:
                         self.antinodes.append(antinode)
 
+    def find_resonating_antinodes(self):
+        self.antinodes = []
+        for l, letter in enumerate(self.locations):
+            print(f'working for letter {self.letters[l]}. It has {len(letter)}')
+            for loc in letter:
+                for i in range(len(letter)):
+                    antinode_d = tuple(numpy.subtract(loc, letter[i]))
+                    antinode = tuple(numpy.add(loc, antinode_d))
+                    while True:
+                        if antinode_d == (0,0):
+                            break
+                        if 0 <= antinode[1] < self.map_w and 0 <= antinode[0] < self.map_h:
+                            self.antinodes.append(antinode)
+                        antinode = tuple(numpy.add(antinode, antinode_d))
+                        if self.map_w <= antinode[1] or antinode[0] < 0 or self.map_h <= antinode[0] or antinode[1] < 0:
+                            self.antinodes.append(loc)
+                            break
+                        
     def apply_anti(self):
-        try:
-            for anti in self.antinodes:
-                new_row = (self.clean_map[anti[0]][:anti[1]] + '#' + (self.clean_map[anti[0]][anti[1]+1:]))
-                self.clean_map[anti[0]] = new_row
-        except:
-            print(anti)
-            return
+        for anti in self.antinodes:
+            new_row = (self.clean_map[anti[0]][:anti[1]] + '#' + (self.clean_map[anti[0]][anti[1]+1:]))
+            self.clean_map[anti[0]] = new_row
  
     def print_map(self):
         for row in self.clean_map:
@@ -62,7 +78,7 @@ class AdventOfCodeD8:
     def print_results(self):
         #print(self.freq)
         #print(self.locations)
-        print(len(self.antinodes))
+        print(len(list(set(self.antinodes))))
         #print(self.map_w)
         return
 
@@ -71,7 +87,8 @@ if __name__ == '__main__':
     advent = AdventOfCodeD8()
     #advent.print_map()
     advent.find_antenna()
-    advent.find_antinodes()
+    #advent.find_antinodes()
+    advent.find_resonating_antinodes()
     advent.apply_anti()
     advent.print_map()
     advent.print_results()
